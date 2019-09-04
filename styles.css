@@ -1,0 +1,19 @@
+html, body, .container-fluid {
+  background-color: #D6D8DC;
+}
+
+.urls-input {
+  font-size: 16px;
+}
+
+.url2png-output {
+  color: #575B5E;
+  font-size: 16px;
+  letter-spacing: 2px;
+  white-space: pre-wrap;
+}
+
+.url2png-heading {
+  color: #575B5E;
+  font-weight: normal;
+}
