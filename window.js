@@ -12,16 +12,18 @@ function makeScreenshotByUrl(indexNumber, url, screenshotFilename) {
       height: 720,
       deviceScaleFactor: 1,
     });
-    await Promise.race([
-      page.goto(url, {waitUntil: 'networkidle2'}),
-      new Promise(x => require('electron').remote.getGlobal('setTimeout')(x, 30000).unref()),
-    ]);
-
-    //await page.goto(contents);
-    //await page.waitForNavigation({ waitUntil: 'networkidle0' })
+    try {
+      await Promise.race([
+        page.goto(url, {waitUntil: 'networkidle2'}),
+        new Promise(x => require('electron').remote.getGlobal('setTimeout')(x, 30000).unref()),
+      ]);
+    }
+    catch (e) {
+      alert('Error ' + e + ' URL:' + url)
+    }
     await page.screenshot({path: require('path').join(document.getElementById('path-output').innerText, indexNumber + '. ' +screenshotFilename+'.png')});
-
     await browser.close();
+
   })();
 }
 
