@@ -28,7 +28,7 @@ function go() {
 }
 
 async function runBrowser() {
-
+//TODO: add proxy support, add in UI too https://github.com/GoogleChrome/puppeteer/issues/336, https://stackoverflow.com/questions/52777757/how-to-use-proxy-in-puppeteer-and-headless-chrome
   const browser = await puppeteer.launch({headless: true});
 
   var arrayOfUrls = document.getElementById('urls-input').value.split('\n');
