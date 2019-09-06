@@ -2,55 +2,56 @@ const puppeteer = require('puppeteer');
 const pLimit = require('p-limit');
 const limit = pLimit(2);
 
-var pathForSavedScreenshot = ""
+var pathForSavedScreenshot = "";
+var screenResolution = "1920x1080";
+var resolutionX = 1920;
+var resolutionY = 1080;
 
 function go() {
   if(document.getElementById('path-output').innerText == ''){
     selectOutputFolder();
+    return;
   }
   if(document.getElementById('urls-input').value == '')
   {
-    alert("Add urls please.")
-    return
+    alert("Add urls please.");
+    return;
   }
-  pathForSavedScreenshot = document.getElementById('path-output').innerText
+
+  var resolution = document.getElementById("resolution-list");
+  screenResolution = resolution.options[resolution.selectedIndex].text;
+  resolutionX = parseInt(screenResolution.split('x')[0]);
+  resolutionY = parseInt(screenResolution.split('x')[1]);
+  pathForSavedScreenshot = document.getElementById('path-output').innerText;
   runBrowser();
 }
 
 async function runBrowser() {
-  // var t = { p : 0};
-  // Object.observe('t', function (id, oldval, newval) {
-  //   document.getElementById('active-count').innerText = newval.toString();
-  //   return newval;
-  // });
-
 
   const browser = await puppeteer.launch({headless: true});
 
   var arrayOfUrls = document.getElementById('urls-input').value.split('\n');
-  var promises = []
+  var promises = [];
   for(var i = 0; i < arrayOfUrls.length; i++){
     var name = getNameForPngByUrl(arrayOfUrls[i]);
     promises.push(limit(makeScreenshotByUrl,browser, i + 1, arrayOfUrls[i], name));
   }
 
-
-
-  await Promise.all(promises)
+  await Promise.all(promises);
   await browser.close();
 }
 
 async function makeScreenshotByUrl(browser, indexNumber, url, screenshotFilename) {
   const page = await browser.newPage();
   await page.setViewport({
-    width: 1280,
-    height: 720,
+    width: resolutionX,
+    height: resolutionY,
     deviceScaleFactor: 1,
   });
   try {
     await Promise.race([
       page.goto(url, {waitUntil: 'networkidle2'}),
-      new Promise(x => require('electron').remote.getGlobal('setTimeout')(x, 30000).unref()),
+        new Promise(x => require('electron').remote.getGlobal('setTimeout')(x, 30000).unref()),
     ]);
   }
   catch (e) {
@@ -58,13 +59,15 @@ async function makeScreenshotByUrl(browser, indexNumber, url, screenshotFilename
   }
   await page.screenshot({path: require('path').join(pathForSavedScreenshot, indexNumber + '. ' +screenshotFilename+'.png')});
   await page.close();
+  document.getElementById('urls-left-count').innerText = limit.pendingCount.toString()
 }
 
 function getNameForPngByUrl(url) {
-  return url.replace(/\//gi,'').replace(/\:/gi,'').replace(/\?/gi,'');
+  return url.replace(/\//gi,'').replace(/\:/gi,'').replace(/\?/gi,'').substring(0,100);
 }
 
 function selectOutputFolder() {
   var t = require('electron').remote.dialog.showOpenDialogSync({ properties: ['openDirectory']})
-  document.getElementById('path-output').innerText = t.toString();
+  if(t!= undefined)
+    document.getElementById('path-output').innerText = t.toString();
 }

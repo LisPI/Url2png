@@ -37,14 +37,31 @@
       </div>
     </div>
 
+      <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+              <h3 class="url2png-heading">Screen resolution</h3>
+              <select id = "resolution-list" class="form-control text-input">
+                  <option value = "1" >1280x720</option>
+                  <option value = "2">1600x900</option>
+                  <option value = "3" selected="selected">1920x1080</option>
+                  <option value = "4">2560x1440</option>
+              </select>
+          </div>
+      </div>
+  <br/>
+
     <button class="col-xs-12 col-sm-12 col-md-12 col-lg-12" id="go" onclick="go()">Get screenshots!</button>
 
     <div class="row">
       <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-        <h3 class="url2png-heading">Active</h3>
-        <pre id="active-count" class="url2png-output"></pre>
+        <h3 class="url2png-heading">Urls left</h3>
+        <pre id="urls-left-count" class="url2png-output"></pre>
       </div>
     </div>
+
+
+
+
   </div>
 </body>
 
