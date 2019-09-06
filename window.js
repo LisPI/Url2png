@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 const pLimit = require('p-limit');
-const limit = pLimit(2);
 
+var limit = pLimit(3);
 var pathForSavedScreenshot = "";
 var screenResolution = "1920x1080";
 var resolutionX = 1920;
@@ -23,6 +23,7 @@ function go() {
   resolutionX = parseInt(screenResolution.split('x')[0]);
   resolutionY = parseInt(screenResolution.split('x')[1]);
   pathForSavedScreenshot = document.getElementById('path-output').innerText;
+  limit = pLimit(parseInt(document.getElementById("speed-input-field").value));
   runBrowser();
 }
 
@@ -39,6 +40,7 @@ async function runBrowser() {
 
   await Promise.all(promises);
   await browser.close();
+  alert("You are welcome!")
 }
 
 async function makeScreenshotByUrl(browser, indexNumber, url, screenshotFilename) {

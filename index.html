@@ -50,11 +50,19 @@
       </div>
   <br/>
 
+  <div class="row">
+      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <h3 class="url2png-heading">Speed (high speed requires large CPU and RAM resources)</h3>
+          <input id = "speed-input-field" type="number" class="form-control text-input" min="1" max="10" value="3">
+      </div>
+  </div>
+  <br/>
+
     <button class="col-xs-12 col-sm-12 col-md-12 col-lg-12" id="go" onclick="go()">Get screenshots!</button>
 
     <div class="row">
       <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-        <h3 class="url2png-heading">Urls left</h3>
+        <h3 class="url2png-heading">Urls left (in queue)</h3>
         <pre id="urls-left-count" class="url2png-output"></pre>
       </div>
     </div>
