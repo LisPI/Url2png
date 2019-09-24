@@ -48,12 +48,17 @@
               </select>
           </div>
       </div>
-  <br/>
 
   <div class="row">
-      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
           <h3 class="url2png-heading">Speed (high speed requires large CPU and RAM resources)</h3>
           <input id = "speed-input-field" type="number" class="form-control text-input" min="1" max="10" value="3">
+      </div>
+      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+          <h3 class="url2png-heading">Proxy settings</h3>
+          <label class="checkbox-inline"><input type="checkbox" value="" onclick="proxySwitch()" id="proxy-switcher">don't use proxy</label>
+          <input class="text-input form-control" type="text" id="username" placeholder="Enter username">
+          <input class="text-input form-control" type="password" id="password" placeholder="Enter password">
       </div>
   </div>
   <br/>

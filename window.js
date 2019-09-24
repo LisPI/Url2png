@@ -1,45 +1,66 @@
 const puppeteer = require('puppeteer');
 const pLimit = require('p-limit');
 
-var limit = pLimit(3);
-var pathForSavedScreenshot = "";
-var screenResolution = "1920x1080";
-var resolutionX = 1920;
-var resolutionY = 1080;
+let limit = pLimit(3);
+let pathForSavedScreenshot = "";
+let resolutionX = 1920;
+let resolutionY = 1080;
 
 function go() {
-  if(document.getElementById('path-output').innerText == ''){
+  if(document.getElementById('path-output').innerText === ''){
     selectOutputFolder();
     return;
   }
-  if(document.getElementById('urls-input').value == '')
+
+  if(document.getElementById('urls-input').value === '')
   {
     alert("Add urls please.");
     return;
   }
 
-  var resolution = document.getElementById("resolution-list");
-  screenResolution = resolution.options[resolution.selectedIndex].text;
+  if(!document.getElementById('proxy-switcher').checked){
+      if(document.getElementById('password').value === '')
+      {
+        alert("Input proxy password please.");
+        return;
+      }
+      if(document.getElementById('username').value === '')
+      {
+        alert("Add proxy username please.");
+        return;
+      }
+  }
+
+  let resolution = document.getElementById("resolution-list");
+  let screenResolution = resolution.options[resolution.selectedIndex].text;
   resolutionX = parseInt(screenResolution.split('x')[0]);
   resolutionY = parseInt(screenResolution.split('x')[1]);
   pathForSavedScreenshot = document.getElementById('path-output').innerText;
   limit = pLimit(parseInt(document.getElementById("speed-input-field").value));
-  runBrowser();
+  runBrowser().then(r => '');
 }
 
 async function runBrowser() {
-//TODO: add proxy support, add in UI too https://github.com/GoogleChrome/puppeteer/issues/336, https://stackoverflow.com/questions/52777757/how-to-use-proxy-in-puppeteer-and-headless-chrome
-  const browser = await puppeteer.launch({headless: true});
 
-  var arrayOfUrls = document.getElementById('urls-input').value.split('\n');
-  var promises = [];
-  for(var i = 0; i < arrayOfUrls.length; i++){
-    var name = getNameForPngByUrl(arrayOfUrls[i]);
+  const browser = await puppeteer.launch({
+    //args: ['--proxy-server=http://192.164.1.1:8080'],
+    //headless: false
+    });
+  //TODO: handle proxy !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  const page = await browser.newPage();
+  await page.authenticate({password:'12qwaszX', username:'user734'});
+  await page.goto('http://google.by', {waitUntil: 'networkidle2'})
+  await page.close();
+
+  let arrayOfUrls = document.getElementById('urls-input').value.split('\n');
+  let promises = [];
+  for(let i = 0; i < arrayOfUrls.length; i++){
+    let name = getNameForPngByUrl(arrayOfUrls[i]);
     promises.push(limit(makeScreenshotByUrl,browser, i + 1, arrayOfUrls[i], name));
   }
 
   await Promise.all(promises);
-  await browser.close();
+  //await browser.close();
   alert("You are welcome!")
 }
 
@@ -59,17 +80,30 @@ async function makeScreenshotByUrl(browser, indexNumber, url, screenshotFilename
   catch (e) {
     alert('Error ' + e + ' URL:' + url)
   }
+  //await page.authenticate({password:'12qwasZXC', user:'user734'});
+
   await page.screenshot({path: require('path').join(pathForSavedScreenshot, indexNumber + '. ' +screenshotFilename+'.png')});
   await page.close();
   document.getElementById('urls-left-count').innerText = limit.pendingCount.toString()
 }
 
 function getNameForPngByUrl(url) {
-  return url.replace(/\//gi,'').replace(/\:/gi,'').replace(/\?/gi,'').substring(0,100);
+  return url.replace(/\//gi,'').replace(/:/gi,'').replace(/\?/gi,'').substring(0,100);
 }
 
 function selectOutputFolder() {
-  var t = require('electron').remote.dialog.showOpenDialogSync({ properties: ['openDirectory']})
-  if(t!= undefined)
-    document.getElementById('path-output').innerText = t.toString();
+  let dialogSyncResult = require('electron').remote.dialog.showOpenDialogSync({properties: ['openDirectory']});
+  if(dialogSyncResult !== undefined)
+    document.getElementById('path-output').innerText = dialogSyncResult.toString();
+}
+
+function proxySwitch() {
+  if(document.getElementById('proxy-switcher').checked){
+    document.getElementById('username').disabled = true;
+    document.getElementById('password').disabled = true;
+  }
+  else{
+  document.getElementById('username').disabled = false;
+  document.getElementById('password').disabled = false;
+  }
 }
