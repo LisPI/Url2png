@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 const pLimit = require('p-limit');
+const getUrls = require('get-urls');
 
 let limit = pLimit(3);
 let pathForSavedScreenshot = "";
@@ -37,6 +38,7 @@ function addProxySettingsElements() {
 }
 
 function go() {
+
   if(document.getElementById('path-output').innerText === ''){
     selectOutputFolder();
     return;
@@ -93,14 +95,17 @@ async function runBrowser() {
       await page.close();
   }
 
-  let arrayOfUrls = document.getElementById('urls-input').value.split('\n');
+  let urlsSet = getUrls(document.getElementById('urls-input').value);
+  let arrayOfUrls = Array.from(urlsSet);
   let promises = [];
   for(let i = 0; i < arrayOfUrls.length; i++){
     let name = getNameForPngByUrl(arrayOfUrls[i]);
     promises.push(limit(makeScreenshotByUrl,browser, i + 1, arrayOfUrls[i], name));
   }
 
+  document.getElementById('urls-left-count').innerText = (limit.activeCount + limit.pendingCount).toString();
   await Promise.all(promises);
+  document.getElementById('urls-left-count').innerText = (limit.activeCount + limit.pendingCount).toString();
   await browser.close();
   alert("You are welcome!")
 }
@@ -123,7 +128,7 @@ async function makeScreenshotByUrl(browser, indexNumber, url, screenshotFilename
   }
   await page.screenshot({path: require('path').join(pathForSavedScreenshot, indexNumber + '. ' +screenshotFilename+'.png')});
   await page.close();
-  document.getElementById('urls-left-count').innerText = limit.pendingCount.toString()
+  document.getElementById('urls-left-count').innerText = (limit.activeCount + limit.pendingCount).toString();
 }
 
 function getNameForPngByUrl(url) {
