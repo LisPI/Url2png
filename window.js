@@ -6,6 +6,36 @@ let pathForSavedScreenshot = "";
 let resolutionX = 1920;
 let resolutionY = 1080;
 
+$(function() {
+    proxyCheck().then(r => "")
+
+});
+
+async function proxyCheck() {
+    const browser = await puppeteer.launch({});
+    const page = await browser.newPage();
+    let response = await page.goto('http://google.by', {waitUntil: 'networkidle2'});
+    let headers = response.headers();
+    for(let prop in headers) {
+        //if(prop == "status" && headers[prop] == 200  )
+        //    alert("Its OK")
+        if(prop === "proxy-authenticate" )
+            addProxySettingsElements();
+    }
+    await page.close();
+    await browser.close();
+}
+
+function addProxySettingsElements() {
+    document.getElementById('div-in-proxy-row').className = "col-xs-6 col-sm-6 col-md-6 col-lg-6";
+    let proxyDiv = document.createElement('div');
+    proxyDiv.className = "col-xs-6 col-sm-6 col-md-6 col-lg-6";
+    proxyDiv.innerHTML = '<h3 class="url2png-heading">Proxy settings</h3>\n' +
+        '<input class="text-input form-control" type="text" id="username" placeholder="Enter username">\n' +
+        '<input class="text-input form-control" type="password" id="password" placeholder="Enter password">';
+    document.getElementById('row-with-proxy').appendChild(proxyDiv);
+}
+
 function go() {
   if(document.getElementById('path-output').innerText === ''){
     selectOutputFolder();
@@ -18,7 +48,7 @@ function go() {
     return;
   }
 
-  if(!document.getElementById('proxy-switcher').checked){
+  if(document.getElementById('password') !== null){
       if(document.getElementById('password').value === '')
       {
         alert("Input proxy password please.");
@@ -46,11 +76,22 @@ async function runBrowser() {
     //args: ['--proxy-server=http://192.164.1.1:8080'],
     //headless: false
     });
-  //TODO: handle proxy !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  const page = await browser.newPage();
-  await page.authenticate({password:'12qwaszX', username:'user734'});
-  await page.goto('http://google.by', {waitUntil: 'networkidle2'})
-  await page.close();
+
+  if(document.getElementById('password') !== null) {
+      const page = await browser.newPage();
+      await page.authenticate({password: document.getElementById('password').value, username: document.getElementById('username').value});
+      let response = await page.goto('http://google.by', {waitUntil: 'networkidle2'});
+      let headers = response.headers();
+      for(let prop in headers) {
+          if(prop === "proxy-authenticate" )
+          {
+              alert("Error. Check proxy user/password");
+              browser.close();
+              return;
+          }
+      }
+      await page.close();
+  }
 
   let arrayOfUrls = document.getElementById('urls-input').value.split('\n');
   let promises = [];
@@ -60,7 +101,7 @@ async function runBrowser() {
   }
 
   await Promise.all(promises);
-  //await browser.close();
+  await browser.close();
   alert("You are welcome!")
 }
 
@@ -80,8 +121,6 @@ async function makeScreenshotByUrl(browser, indexNumber, url, screenshotFilename
   catch (e) {
     alert('Error ' + e + ' URL:' + url)
   }
-  //await page.authenticate({password:'12qwasZXC', user:'user734'});
-
   await page.screenshot({path: require('path').join(pathForSavedScreenshot, indexNumber + '. ' +screenshotFilename+'.png')});
   await page.close();
   document.getElementById('urls-left-count').innerText = limit.pendingCount.toString()
@@ -95,15 +134,4 @@ function selectOutputFolder() {
   let dialogSyncResult = require('electron').remote.dialog.showOpenDialogSync({properties: ['openDirectory']});
   if(dialogSyncResult !== undefined)
     document.getElementById('path-output').innerText = dialogSyncResult.toString();
-}
-
-function proxySwitch() {
-  if(document.getElementById('proxy-switcher').checked){
-    document.getElementById('username').disabled = true;
-    document.getElementById('password').disabled = true;
-  }
-  else{
-  document.getElementById('username').disabled = false;
-  document.getElementById('password').disabled = false;
-  }
 }

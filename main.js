@@ -22,7 +22,7 @@ webPreferences: {
             nodeIntegration: true
         }
   })
-  //window.removeMenu()
+  window.removeMenu()
 
   //window.webContents.openDevTools()
 
