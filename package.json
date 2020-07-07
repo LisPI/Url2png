@@ -7,7 +7,7 @@
     "start": "electron main.js"
   },
   "devDependencies": {
-    "electron": "^6.0.7"
+    "electron": "^7.2.4"
   },
   "dependencies": {
     "get-urls": "^9.1.0",
